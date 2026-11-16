@@ -1,10 +1,19 @@
-import decimal
-from decimal import Decimal
+import re
+from typing import Callable, Iterator
 
-number = Decimal("1.45")
 
-print("Округлення за замовчуванням ROUND_HALF_EVEN:", number.quantize(Decimal("0.0")))
-print("Округлення вгору ROUND_HALF_UP:", number.quantize(Decimal("0.0"), rounding=decimal.ROUND_HALF_UP))
-print("Округлення вниз ROUND_FLOOR:", number.quantize(Decimal("0.0"), rounding=decimal.ROUND_FLOOR))
-print("Округлення вгору ROUND_CEILING:", number.quantize(Decimal("0.0"), rounding=decimal.ROUND_CEILING))
-print("Округлення до трьох десяткових знаків:", Decimal("3.14159"). quantize(Decimal("0.000")))
+def generator_numbers(text: str) -> Iterator[float]:
+    """Повертає генератор дійсних чисел, знайдених у тексті."""
+    pattern = r"(?<!\S)\d+\.\d+(?!\S)"
+    for match in re.finditer(pattern, text):
+        yield float(match.group())
+
+
+def sum_profit(text: str, func: Callable[[str], Iterator[float]]) -> float:
+    """Підсумовує всі числа, які повертає генератор func для тексту."""
+    return sum(func(text))
+
+
+text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями 27.45 і 324.00 доларів."
+total_income = sum_profit(text, generator_numbers)
+print(f"Загальний дохід: {total_income}")
